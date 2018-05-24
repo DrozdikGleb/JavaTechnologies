@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by Gleb on 12.05.2018
  */
+
 public class HelloUDPClient implements HelloClient {
     private static final int TIMEOUT = 300;
 
@@ -28,11 +29,10 @@ public class HelloUDPClient implements HelloClient {
                                 datagramSocket.setSoTimeout(TIMEOUT);
                                 for (int j = 0; j < requests; j++) {
                                     String request = prefix + finalI + "_" + j;
-                                    byte[] bytesOfRequest = request.getBytes(StandardCharsets.UTF_8);
+                                    final byte[] bytesOfRequest = request.getBytes(StandardCharsets.UTF_8);
                                     String response;
+                                    System.out.println(request);
                                     while (true) {
-                                        DatagramPacket responsePacket = new DatagramPacket(new byte[datagramSocket.getReceiveBufferSize()],
-                                                0, datagramSocket.getReceiveBufferSize());
                                         try {
                                             try {
                                                 datagramSocket.send(new DatagramPacket(bytesOfRequest, bytesOfRequest.length, address, port));
@@ -40,9 +40,11 @@ public class HelloUDPClient implements HelloClient {
                                                 System.err.println("Error occurred while sending request");
                                                 continue;
                                             }
+                                            DatagramPacket responsePacket = new DatagramPacket(new byte[datagramSocket.getReceiveBufferSize()],
+                                                    0, datagramSocket.getReceiveBufferSize());
                                             datagramSocket.receive(responsePacket);
-                                            response = new String(responsePacket.getData(), 0, responsePacket.getLength());
-                                            if (response.equals("Hello, " + request)) {
+                                            response = new String(responsePacket.getData(), 0, responsePacket.getLength(), StandardCharsets.UTF_8);
+                                            if (response.contains(request)) {
                                                 System.out.println(response);
                                                 break;
                                             }
